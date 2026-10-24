@@ -1,0 +1,244 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Какая ты песня 2018?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS СТИЛИ --- */
+        :root {
+            --primary: #ff00cc;
+            --secondary: #3333ff;
+            --bg-gradient: linear-gradient(45deg, #ff00cc, #3333ff, #00d4ff);
+            --glass: rgba(255, 255, 255, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-gradient);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #quiz-container {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+
+        h1 {
+            font-weight: 900;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .question {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+            min-height: 60px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            padding: 15px 25px;
+            border-radius: 15px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        button:hover {
+            background: white;
+            color: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        #result {
+            display: none;
+        }
+
+        .result-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .song-name {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            display: block;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255,255,255,0.6);
+        }
+
+        .restart-btn {
+            margin-top: 20px;
+    /* Анимации появления */
+    .fade-in {
+        animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+<div id="quiz-container">
+    <!-- Экран вопроса -->
+    <div id="quiz-content">
+        <h1 id="header-title">Vibe Check 2018</h1>
+        <p class="question" id="question-text">Загрузка вопроса...</p>
+        <div class="options" id="options-container">
+            <!-- Кнопки появятся здесь -->
+        </div>
+    </div>
+
+    <!-- Экран результата -->
+    <div id="result">
+        <p class="result-title">Твоя энергия сегодня — это:</p>
+        <span class="song-name" id="song-result">Песня</span>
+        <button class="restart-btn" onclick="restartQuiz()">Пройти еще раз</button>
+    </div>
+</div>
+
+<script>
+    /* --- JAVASCRIPT ЛОГИКА --- */
+
+    // Данные теста
+    // Каждому ответу присваиваем "вес" (тип личности/песни)
+    const questions = [
+        {
+            q: "Твой идеальный вечер в 2018-м?",
+            options: [
+                { text: "Танцы в клубе до утра", type: "dance" },
+                { text: "Слушать грустный плейлист в одиночестве", type: "sad" },
+                { text: "Гулять по ночному городу с друзьями", type: "chill" },
+                { text: "Залипать в TikTok/Instagram", type: "hype" }
+            ]
+        },
+        {
+            q: "Какой цвет тебе ближе?",
+            options: [
+                { text: "Неоновый розовый", type: "hype" },
+                { text: "Глубокий синий", type: "sad" },
+                { text: "Пастельный бежевый", type: "chill" },
+                { text: "Яркий желтый", type: "dance" }
+            ]
+        },
+        {
+            q: "Твой стиль одежды?",
+            options: [
+                { text: "Оверсайз и кроссовки", type: "hype" },
+                { text: "Что-то эстетичное и легкое", type: "chill" },
+                { text: "Черное и мрачное", type: "sad" },
+                { text: "Всё самое яркое!", type: "dance" }
+            ]
+        }
+    ];
+
+    // База песен (соответствие типам)
+    const songLibrary = {
+        dance: "Drake - In My Feelings 🕺",
+        sad: "Billie Eilish - Bad Guy (sad version) 🖤",
+        chill: "Post Malone - Sunflower 🌻",
+        hype: "Travis Scott - Sicko Mode 🔥"
+    };
+
+    let currentQuestionIndex = 0;
+    let scores = { dance: 0, sad: 0, chill: 0, hype: 0 };
+
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const quizContent = document.getElementById('quiz-content');
+    const resultScreen = document.getElementById('result');
+    const songResult = document.getElementById('song-result');
+
+    function startQuiz() {
+        currentQuestionIndex = 0;
+        scores = { dance: 0, sad: 0, chill: 0, hype: 0 };
+        quizContent.style.display = 'block';
+        resultScreen.style.display = 'none';
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const currentQuestion = questions[currentQuestionIndex];
+        questionText.innerText = currentQuestion.q;
+        questionText.classList.remove('fade-in');
+        void questionText.offsetWidth; // Хаки для перезапуска анимации
+        questionText.classList.add('fade-in');
+
+        optionsContainer.innerHTML = '';
+
+        currentQuestion.options.forEach(option => {
+    function selectOption(type) {
+        scores[type]++;
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < questions.length) {
+            showQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        quizContent.style.display = 'none';
+        resultScreen.style.display = 'block';
+        resultScreen.classList.add('fade-in');
+
+        // Находим тип с максимальным баллом
+        const winner = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+        songResult.innerText = songLibrary[winner];
+    }
+
+    function restartQuiz() {
+        startQuiz();
+    }
+
+    // Запуск при загрузке
+    window.onload = startQuiz;
+
+</script>
